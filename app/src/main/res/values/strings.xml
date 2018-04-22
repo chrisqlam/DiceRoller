@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DiceRoller</string>
+    <string name="title_activity_d10">D10</string>
+</resources>
