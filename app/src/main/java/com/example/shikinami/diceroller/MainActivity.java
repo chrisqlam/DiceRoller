@@ -7,7 +7,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v4.view.GestureDetectorCompat;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.GestureDetector;
@@ -17,7 +16,7 @@ import android.widget.Toast;
 
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GestureDetector.OnGestureListener {
 
 
     TextView result;
@@ -28,11 +27,10 @@ public class MainActivity extends AppCompatActivity {
     float accelLast;
     private SensorManager sensorManager;
 
-
-    GestureDetectorCompat gestureDetector;
-    private static final int SWIPE_MAX = 250;
-    private static final int SWIPE_MIN_DISTANCE = 120;
-    private static final int SWIPE_THRESHOLD_VELOCITY = 120;
+    private GestureDetector gesture;
+    private static final int SWIPE_MIN_DISTANCE = 120; //minimum
+    private static final int SWIPE_MAX_OFF_PATH = 250; //to here
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200; //minimum speed
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         accelLast = SensorManager.GRAVITY_EARTH;
         accelCurrent = SensorManager.GRAVITY_EARTH;
 
-        //swiping
-        gestureDetector = new GestureDetectorCompat(this, new MyGestureListener());
+        gesture = new GestureDetector(this);
+
     }
 
 
@@ -67,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             accel = accel * 0.9f + delta;
 
             //if enough force is here, it rolls the dice
-            if (accel > 10) {
+            if (accel > 15) {
                 onShake();
             }
         }
@@ -114,36 +112,63 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+    //GESTURES
+    //when touch event is detected use the gesturelistener
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        return gesture.onTouchEvent(event);
+    }
 
-        @Override
-        public boolean onDown(MotionEvent motionEvent) {
-            return true; //must be true to fling
+    @Override
+    public boolean onDown(MotionEvent motionEvent) {
+        //required to function
+        return false;
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float ve1ocityY) {
+        if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+        return false;
+
+        if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY)
+        {
+            //right to left
+            Intent intent = new Intent(this, D12.class);
+            startActivity(intent);
         }
-
-        @Override
-        public boolean onFling(MotionEvent event1, MotionEvent event2, float velocityx, float velocityy) {
-
-            if (Math.abs(event1.getY() - event2.getY()) > SWIPE_MAX) {
-                return false;
-            }
-
-            //swipe right to left
-            if (event1.getX() - event2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityx) > SWIPE_THRESHOLD_VELOCITY) {
-                Intent intent = new Intent(MainActivity.this.getBaseContext(), D12.class);
+        else
+        {
+            if(e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY)
+            {
+                //left to right
+                Intent intent = new Intent(this, D4.class);
                 startActivity(intent);
             }
-            //swipe left to right
-            else
-            {
-                if (event2.getX() - event1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityx) > SWIPE_THRESHOLD_VELOCITY)
-                {
-                    Intent intent = new Intent(MainActivity.this.getBaseContext(), D4.class);
-                    startActivity(intent);
-                }
-            }
-            return  false;
         }
+        return  false;
+    }
+
+
+    @Override
+    public void onShowPress(MotionEvent motionEvent) {
+        //auto generated
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent motionEvent) {
+        //auto generated
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        //auto generated
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent motionEvent) {
+        //auto generated
     }
 }
 
